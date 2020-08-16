@@ -5,5 +5,14 @@ services:
     build:
       context: .
     volumes:
-      - './data-folder:/data'
-      - './camera-upload-folder:/watch'
+      # Folders
+      - './train:/train'
+      - './model:/model'
+      - './camera:/camera'
+    environment:
+      # Folders
+      - TRAIN_PATH=/train
+      - MODEL_PATH=/model
+      - MODEL_PATH=/camera
+      # Files
+      - MODEL_FILE=model.clf

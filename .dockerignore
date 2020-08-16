@@ -1,0 +1,7 @@
+# Environments
+.env
+
+# Data
+train/*
+model/*
+camera/*
