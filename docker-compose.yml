@@ -13,6 +13,6 @@ services:
       # Folders
       - TRAIN_PATH=/train
       - MODEL_PATH=/model
-      - MODEL_PATH=/camera
+      - CAMERA_PATH=/camera
       # Files
       - MODEL_FILE=model.clf
