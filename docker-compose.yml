@@ -1,0 +1,9 @@
+version: '3'
+services:
+  home-camera-face-recognition:
+    container_name: home-camera-face-recognition
+    build:
+      context: .
+    volumes:
+      - './data-folder:/data'
+      - './camera-upload-folder:/watch'
