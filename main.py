@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import time
 
@@ -9,6 +10,13 @@ from watchdog.observers import Observer
 from people_finder import Recognition
 from threading import Thread
 
+# Environments
+CAMERA_PATH = os.getenv("CAMERA_PATH")
+TRAIN_PATH  = os.getenv("TRAIN_PATH")
+MODEL_PATH  = os.getenv("MODEL_PATH")
+MODEL_FILE  = os.getenv("MODEL_FILE")
+
+
 
 class NewImageEventHandler(FileSystemEventHandler):
     
@@ -16,7 +24,7 @@ class NewImageEventHandler(FileSystemEventHandler):
         self.observer = observer
         # Init recognizer
         self.recognizer = Recognition()
-        self.recognizer.train_dataset('/data/train/', '/data/model.clf')
+        self.recognizer.train_dataset(TRAIN_PATH, os.path.join(MODEL_PATH, MODEL_FILE))
 
     def on_created(self, event):
         # Check if it's a file or a dir
@@ -24,7 +32,7 @@ class NewImageEventHandler(FileSystemEventHandler):
             # Check if it's an image
             if event.src_path.lower().endswith(('.png', '.jpg', '.jpeg')): # Ignore if it isn't an image
                 # Create thread to process file
-                f = ImageProcess(event.src_path, '/data/model.clf')
+                f = ImageProcess(event.src_path, os.path.join(MODEL_PATH, MODEL_FILE))
                 # Start the created thread
                 f.start()
 
@@ -55,10 +63,9 @@ class ImageProcess(Thread):
 
 if __name__ == "__main__":
     print('Starting...')
-    path = '/watch/'
     observer = Observer()
     event_handler = NewImageEventHandler(observer)
-    observer.schedule(event_handler, path, recursive=True)
+    observer.schedule(event_handler, CAMERA_PATH, recursive=True)
     observer.start()
     print('Running...')
     observer.join()
