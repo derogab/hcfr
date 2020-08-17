@@ -4,7 +4,6 @@
 import os
 import sys
 import time
-import shutil
 import distutils.util
 
 from watchdog.events import FileSystemEventHandler
