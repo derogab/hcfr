@@ -16,3 +16,5 @@ services:
       - CAMERA_PATH=/camera
       # Files
       - MODEL_FILE=model.clf
+      # Configs
+      - CLEAR_CAMERA_DATA=True
