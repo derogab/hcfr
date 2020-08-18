@@ -3,6 +3,7 @@
 
 import os
 import sys
+import csv
 import time
 import distutils.util
 
@@ -11,20 +12,23 @@ from watchdog.observers import Observer
 from people_finder import Recognition
 from threading import Thread
 from dotenv import load_dotenv
+from datetime import datetime
 
 
 load_dotenv()
 # Environments
-CAMERA_PATH = os.getenv("CAMERA_PATH")
-TRAIN_PATH  = os.getenv("TRAIN_PATH")
-MODEL_PATH  = os.getenv("MODEL_PATH")
-MODEL_FILE  = os.getenv("MODEL_FILE")
+CAMERA_PATH       = os.getenv("CAMERA_PATH")
+TRAIN_PATH        = os.getenv("TRAIN_PATH")
+MODEL_PATH        = os.getenv("MODEL_PATH")
+MODEL_FILE        = os.getenv("MODEL_FILE")
+DB_PATH           = os.getenv("DB_PATH")
+DB_LOGS_FILE      = os.getenv("DB_LOGS_FILE")
 CLEAR_CAMERA_DATA = distutils.util.strtobool(os.getenv("CLEAR_CAMERA_DATA"))
 
 
 
 class NewImageEventHandler(FileSystemEventHandler):
-    
+
     def __init__(self, observer):
         self.observer = observer
         self.recognizer = Recognition()
@@ -42,7 +46,7 @@ class NewImageEventHandler(FileSystemEventHandler):
                 os.remove(os.path.join(folder, content))
             elif os.path.isdir(os.path.join(folder, content)):
                 self.__clear_folder(os.path.join(folder, content))
-        
+
 
     def on_created(self, event):
         # Check if it's a file or a dir
@@ -57,13 +61,15 @@ class NewImageEventHandler(FileSystemEventHandler):
 
 
 class ImageProcess(Thread):
-    
+
     def __init__(self, src_path, model_path):
         Thread.__init__(self)
         # Set the variables
         self.src_path = src_path
         self.model_path = model_path
         self.recognizer = Recognition()
+        self.timestamp = datetime.utcnow().timestamp()
+        self.logs = os.path.join(DB_PATH, DB_LOGS_FILE)
 
     def run(self):
         # Wait upload time
@@ -79,7 +85,12 @@ class ImageProcess(Thread):
             for person in res:
                 if person != 'unknown':
                     print(person + ' found!')
-
+                    # Insert logs
+                    with open(self.logs, 'a+', newline='') as write_obj:
+                        # Create a writer object from csv module
+                        csv_writer = csv.writer(write_obj)
+                        # Add contents of list as last row in the csv file
+                        csv_writer.writerow([person, self.timestamp])
 
 
 if __name__ == "__main__":

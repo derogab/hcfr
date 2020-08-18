@@ -9,12 +9,15 @@ services:
       - './train:/train'
       - './model:/model'
       - './camera:/camera'
+      - './db:/db'
     environment:
       # Folders
       - TRAIN_PATH=/train
       - MODEL_PATH=/model
       - CAMERA_PATH=/camera
+      - DB_PATH=/db
       # Files
       - MODEL_FILE=model.clf
+      - DB_LOGS_FILE=logs.csv
       # Configs
       - CLEAR_CAMERA_DATA=True

@@ -5,3 +5,4 @@
 train/*
 model/*
 camera/*
+db/*
