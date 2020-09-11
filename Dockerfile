@@ -4,8 +4,8 @@ FROM python:3
 WORKDIR /app
 
 # Install app dependencies
-RUN apt-get update && apt-get install -y cmake
-RUN pip install wheel setuptools python-dotenv dlib watchdog people-finder
+RUN apt-get update && apt-get install -y cmake > /dev/null
+RUN pip install wheel setuptools python-dotenv dlib watchdog people-finder > /dev/null
 
 # Copy app 
 COPY . .
