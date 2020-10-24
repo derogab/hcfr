@@ -1,5 +1,5 @@
 # Start image
-FROM python:3.6-slim-stretch
+FROM python:3-slim-stretch
 # Install pre-requirements
 RUN apt-get -y update
 RUN apt-get install -y --fix-missing \
