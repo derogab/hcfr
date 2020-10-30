@@ -5,6 +5,7 @@ import os
 import sys
 import csv
 import time
+import schedule
 import distutils.util
 
 from watchdog.events import FileSystemEventHandler
@@ -16,7 +17,7 @@ from datetime import datetime
 
 
 load_dotenv()
-# Environments
+### ENVIRONMENTS ###
 CAMERA_PATH       = os.getenv("CAMERA_PATH")
 TRAIN_PATH        = os.getenv("TRAIN_PATH")
 MODEL_PATH        = os.getenv("MODEL_PATH")
@@ -27,10 +28,44 @@ CLEAR_CAMERA_DATA = distutils.util.strtobool(os.getenv("CLEAR_CAMERA_DATA"))
 
 
 
+class ImageQueue:
+
+    def __init__(self, init_list = []):
+        # Init list
+        self.q = init_list
+
+    def empty(self):
+        # Return true if queue is empty
+        if len(self.q) == 0:
+            return True
+        return False
+
+    def size(self):
+        # Return the size of the queue
+        return len(self.q)
+
+    def get(self, n = 1):
+        # Get the first N elements
+        return self.q[0:n]
+
+    def pop(self, n = 1):
+        # Pop the first N elements
+        elements = []
+        for i in range(0, n):
+            elements.append(self.q.pop(0))
+        return elements
+
+    def put(self, element):
+        # Put a new element
+        self.q.append(element)
+
+
+
 class NewImageEventHandler(FileSystemEventHandler):
 
-    def __init__(self, observer):
+    def __init__(self, observer, queue):
         self.observer = observer
+        self.queue = queue
         self.recognizer = Recognition()
         # Train recognizer
         self.recognizer.train_dataset(os.path.join(TRAIN_PATH), os.path.join(MODEL_PATH, MODEL_FILE))
@@ -53,27 +88,22 @@ class NewImageEventHandler(FileSystemEventHandler):
         if not event.is_directory: # Ignore if it's a dir
             # Check if it's an image
             if event.src_path.lower().endswith(('.png', '.jpg', '.jpeg')): # Ignore if it isn't an image
-                # Create thread to process file
-                f = ImageProcess(event.src_path, os.path.join(MODEL_PATH, MODEL_FILE))
-                # Start the created thread
-                f.start()
+                # Insert created image in queue
+                queue.put(event.src_path)                
 
 
 
-class ImageProcess(Thread):
+class ImageProcess:
 
-    def __init__(self, src_path, model_path):
-        Thread.__init__(self)
+    def __init__(self, src_path, model_path, timestamp = None):
         # Set the variables
         self.src_path = src_path
         self.model_path = model_path
         self.recognizer = Recognition()
-        self.timestamp = datetime.utcnow().timestamp()
+        self.timestamp = timestamp if timestamp else datetime.utcnow().timestamp()
         self.logs = os.path.join(DB_PATH, DB_LOGS_FILE)
 
-    def run(self):
-        # Wait upload time
-        time.sleep(5)
+    def process(self):
         # Find people in an image
         res = self.recognizer.find_people_in_image(self.src_path, self.model_path)
         # Remove image
@@ -84,7 +114,7 @@ class ImageProcess(Thread):
             # One (or more) person found
             for person in res:
                 if person != 'unknown':
-                    print(person + ' found!')
+                    print('[result] ', person, ' found!')
                     # Insert logs
                     with open(self.logs, 'a+', newline='') as write_obj:
                         # Create a writer object from csv module
@@ -93,11 +123,76 @@ class ImageProcess(Thread):
                         csv_writer.writerow([person, self.timestamp])
 
 
-if __name__ == "__main__":
-    print('Starting...')
+
+class Analyzer(Thread):
+
+    def __init__(self, queue):
+        # Super thread
+        Thread.__init__(self)
+        # Get the number of images to analyze
+        n = queue.size()
+        # Get list of images to analyze
+        self.images = queue.pop(n)
+
+    def run(self):
+        # Start processing all images
+        if len(self.images) > 0:
+            print('[open] processing ', len(self.images), ' images...')
+        # Process each image
+        for image in self.images:
+            # Get current timestamp
+            now = datetime.utcnow().timestamp()
+            # Create tool to process image
+            f = ImageProcess(image, os.path.join(MODEL_PATH, MODEL_FILE), now)
+            # Process this image
+            f.process()
+        # End 
+        if len(self.images) > 0:
+            print('[close] ', len(self.images), ' images processed.')
+            
+        
+        
+    
+### GLOBAL ### 
+
+# Initializing a queue 
+queue = ImageQueue()
+
+# Cron job to repeat
+def job():
+    # Use global queue
+    global queue
+    # Create analyzer
+    a = Analyzer(queue)
+    # Do everything
+    a.start()
+
+# Main 
+def main():
+    # Use global queue
+    global queue
+    # Start all
+    print('[info] starting...')
+    # Create observer
     observer = Observer()
-    event_handler = NewImageEventHandler(observer)
+    # Init recognition model
+    event_handler = NewImageEventHandler(observer, queue)
+    print('[info] recognition model generated.')
+    # Schedule job for image recognition process
+    schedule.every(1).minutes.do(job)
+    print('[info] process job scheduled.')
+    # Schedule event on new image
     observer.schedule(event_handler, CAMERA_PATH, recursive=True)
     observer.start()
-    print('Running...')
+    print('[info] observer listening...')
+    # Run job schedule pending...
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+    # End
     observer.join()
+
+
+### START ###
+if __name__ == "__main__":
+    main()
