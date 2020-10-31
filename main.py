@@ -11,7 +11,7 @@ import distutils.util
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 from people_finder import Recognition
-from threading import Thread
+from threading import Thread, Lock
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -126,9 +126,11 @@ class ImageProcess:
 
 class Analyzer(Thread):
 
-    def __init__(self, queue):
+    def __init__(self, queue, lock):
         # Super thread
         Thread.__init__(self)
+        # Get lock
+        self.lock = lock
         # Get the number of images to analyze
         n = queue.size()
         # Get list of images to analyze
@@ -137,7 +139,9 @@ class Analyzer(Thread):
     def run(self):
         # Start processing all images
         if len(self.images) > 0:
+            self.lock.acquire()
             print('[open] processing ', len(self.images), ' images...')
+            self.lock.release()
         # Process each image
         for image in self.images:
             # Get current timestamp
@@ -148,8 +152,9 @@ class Analyzer(Thread):
             f.process()
         # End 
         if len(self.images) > 0:
+            self.lock.acquire()
             print('[close] ', len(self.images), ' images processed.')
-            
+            self.lock.release()
         
         
     
@@ -157,13 +162,15 @@ class Analyzer(Thread):
 
 # Initializing a queue 
 queue = ImageQueue()
+# Init lock 
+lock = Lock()
 
 # Cron job to repeat
 def job():
     # Use global queue
     global queue
     # Create analyzer
-    a = Analyzer(queue)
+    a = Analyzer(queue, lock)
     # Do everything
     a.start()
 
