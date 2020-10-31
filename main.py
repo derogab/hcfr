@@ -103,7 +103,7 @@ class ImageProcess:
         self.timestamp = timestamp if timestamp else datetime.utcnow().timestamp()
         self.logs = os.path.join(DB_PATH, DB_LOGS_FILE)
 
-    def process(self):
+    def process(self, lock):
         # Find people in an image
         res = self.recognizer.find_people_in_image(self.src_path, self.model_path)
         # Remove image
@@ -114,7 +114,9 @@ class ImageProcess:
             # One (or more) person found
             for person in res:
                 if person != 'unknown':
+                    lock.acquire()
                     print('[result] ', person, ' found!')
+                    lock.release()
                     # Insert logs
                     with open(self.logs, 'a+', newline='') as write_obj:
                         # Create a writer object from csv module
@@ -149,7 +151,7 @@ class Analyzer(Thread):
             # Create tool to process image
             f = ImageProcess(image, os.path.join(MODEL_PATH, MODEL_FILE), now)
             # Process this image
-            f.process()
+            f.process(self.lock)
         # End 
         if len(self.images) > 0:
             self.lock.acquire()
