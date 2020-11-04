@@ -63,9 +63,10 @@ class ImageQueue:
 
 class NewImageEventHandler(FileSystemEventHandler):
 
-    def __init__(self, observer, queue):
+    def __init__(self, observer, queue, lock):
         self.observer = observer
         self.queue = queue
+        self.lock = lock
         self.recognizer = Recognition()
         # Train recognizer
         self.recognizer.train_dataset(os.path.join(TRAIN_PATH), os.path.join(MODEL_PATH, MODEL_FILE))
@@ -88,8 +89,12 @@ class NewImageEventHandler(FileSystemEventHandler):
         if not event.is_directory: # Ignore if it's a dir
             # Check if it's an image
             if event.src_path.lower().endswith(('.png', '.jpg', '.jpeg')): # Ignore if it isn't an image
+                # Acquire the queue
+                self.lock.acquire()
                 # Insert created image in queue
-                queue.put(event.src_path)                
+                queue.put(event.src_path)
+                # Release the queue
+                self.lock.release()
 
 
 
@@ -128,35 +133,41 @@ class ImageProcess:
 
 class Analyzer(Thread):
 
-    def __init__(self, queue, lock):
+    def __init__(self, queue, locks):
         # Super thread
         Thread.__init__(self)
         # Get lock
-        self.lock = lock
-        # Get the number of images to analyze
-        n = queue.size()
-        # Get list of images to analyze
-        self.images = queue.pop(n)
+        self.stdout_lock, self.queue_lock = locks
+        # Get queue
+        self.queue = queue
 
     def run(self):
+        # Lock the queue
+        self.queue_lock.acquire()
+        # Get the number of images to analyze
+        n = self.queue.size()
+        # Get list of images to analyze
+        images = self.queue.pop(n)
+        # Release the queue
+        self.queue_lock.release()
         # Start processing all images
-        if len(self.images) > 0:
-            self.lock.acquire()
-            print('[open] processing ', len(self.images), ' images...')
-            self.lock.release()
+        if len(images) > 0:
+            self.stdout_lock.acquire()
+            print('[open] processing ', len(images), ' images...')
+            self.stdout_lock.release()
         # Process each image
-        for image in self.images:
+        for image in images:
             # Get current timestamp
             now = datetime.utcnow().timestamp()
             # Create tool to process image
             f = ImageProcess(image, os.path.join(MODEL_PATH, MODEL_FILE), now)
             # Process this image
-            f.process(self.lock)
+            f.process(self.stdout_lock)
         # End 
-        if len(self.images) > 0:
-            self.lock.acquire()
-            print('[close] ', len(self.images), ' images processed.')
-            self.lock.release()
+        if len(images) > 0:
+            self.stdout_lock.acquire()
+            print('[close] ', len(images), ' images processed.')
+            self.stdout_lock.release()
         
         
     
@@ -164,28 +175,29 @@ class Analyzer(Thread):
 
 # Initializing a queue 
 queue = ImageQueue()
-# Init lock 
-lock = Lock()
+# Init locks
+stdout_lock = Lock()
+queue_lock = Lock()
 
 # Cron job to repeat
 def job():
     # Use global queue
-    global queue
+    global queue, queue_lock, stdout_lock
     # Create analyzer
-    a = Analyzer(queue, lock)
+    a = Analyzer(queue, (stdout_lock, queue_lock))
     # Do everything
     a.start()
 
 # Main 
 def main():
     # Use global queue
-    global queue
+    global queue, queue_lock
     # Start all
     print('[info] starting...')
     # Create observer
     observer = Observer()
     # Init recognition model
-    event_handler = NewImageEventHandler(observer, queue)
+    event_handler = NewImageEventHandler(observer, queue, queue_lock)
     print('[info] recognition model generated.')
     # Schedule job for image recognition process
     schedule.every(1).minutes.do(job)
