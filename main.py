@@ -116,7 +116,7 @@ class ImageProcess:
         # Check if people have been found
         if len(res):
             # Get photo time or use analysis timestamp
-            photo_time = datetime.fromtimestamp(os.path.getmtime(self.src_path))
+            photo_time = os.path.getmtime(self.src_path)
             self.timestamp = photo_time if photo_time else self.timestamp
             # One (or more) person found
             for person in res:
