@@ -69,7 +69,8 @@ class NewImageEventHandler(FileSystemEventHandler):
         self.lock = lock
         self.recognizer = Recognition()
         # Train recognizer
-        self.recognizer.train_dataset(os.path.join(TRAIN_PATH), os.path.join(MODEL_PATH, MODEL_FILE))
+        if not os.path.isfile(os.path.join(MODEL_PATH, MODEL_FILE)):
+            self.recognizer.train_dataset(os.path.join(TRAIN_PATH), os.path.join(MODEL_PATH, MODEL_FILE))
         # Clean camera folder
         if CLEAR_CAMERA_DATA:
             self.__clear_folder(CAMERA_PATH)
@@ -200,7 +201,7 @@ def main():
     event_handler = NewImageEventHandler(observer, queue, queue_lock)
     print('[info] recognition model generated.')
     # Schedule job for image recognition process
-    schedule.every(1).minutes.do(job)
+    schedule.every(5).minutes.do(job)
     print('[info] process job scheduled.')
     # Schedule event on new image
     observer.schedule(event_handler, CAMERA_PATH, recursive=True)
