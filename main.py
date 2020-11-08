@@ -24,7 +24,7 @@ MODEL_PATH        = os.getenv("MODEL_PATH")
 MODEL_FILE        = os.getenv("MODEL_FILE")
 DB_PATH           = os.getenv("DB_PATH")
 DB_LOGS_FILE      = os.getenv("DB_LOGS_FILE")
-CRON_TIME         = os.getenv("CRON_TIME")
+CRON_TIME         = int(os.getenv("CRON_TIME"))
 CLEAR_CAMERA_DATA = distutils.util.strtobool(os.getenv("CLEAR_CAMERA_DATA"))
 
 
