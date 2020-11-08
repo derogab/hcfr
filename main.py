@@ -157,10 +157,10 @@ class Analyzer(Thread):
             self.stdout_lock.acquire()
             print('[open] processing ', len(images), ' images...')
             self.stdout_lock.release()
+        # Get current timestamp
+        now = datetime.utcnow().timestamp()
         # Process each image
         for image in images:
-            # Get current timestamp
-            now = datetime.utcnow().timestamp()
             # Create tool to process image
             f = ImageProcess(image, os.path.join(MODEL_PATH, MODEL_FILE), now)
             # Process this image
