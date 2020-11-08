@@ -21,3 +21,4 @@ services:
       - DB_LOGS_FILE=logs.csv
       # Configs
       - CLEAR_CAMERA_DATA=True
+      - CRON_TIME=10

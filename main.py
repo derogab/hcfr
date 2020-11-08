@@ -24,6 +24,7 @@ MODEL_PATH        = os.getenv("MODEL_PATH")
 MODEL_FILE        = os.getenv("MODEL_FILE")
 DB_PATH           = os.getenv("DB_PATH")
 DB_LOGS_FILE      = os.getenv("DB_LOGS_FILE")
+CRON_TIME         = os.getenv("CRON_TIME")
 CLEAR_CAMERA_DATA = distutils.util.strtobool(os.getenv("CLEAR_CAMERA_DATA"))
 
 
@@ -201,7 +202,7 @@ def main():
     event_handler = NewImageEventHandler(observer, queue, queue_lock)
     print('[info] recognition model generated.')
     # Schedule job for image recognition process
-    schedule.every(5).minutes.do(job)
+    schedule.every(CRON_TIME).minutes.do(job)
     print('[info] process job scheduled.')
     # Schedule event on new image
     observer.schedule(event_handler, CAMERA_PATH, recursive=True)
