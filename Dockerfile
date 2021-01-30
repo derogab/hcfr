@@ -69,7 +69,7 @@ RUN cd ~ && \
     cd people-finder/ && \
     sed -i 's/opencv-python-headless/opencv-python/' setup.py && \
     python3 setup.py install
-# Install home-camera-face-recognition requirements
+# Install hcfr requirements
 RUN python3 -m pip install wheel setuptools python-dotenv dlib watchdog schedule people-finder
 # Set working directory
 WORKDIR /app

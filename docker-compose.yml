@@ -1,7 +1,7 @@
 version: '3'
 services:
-  home-camera-face-recognition:
-    container_name: home-camera-face-recognition
+  hcfr:
+    container_name: hcfr
     build:
       context: .
     volumes:
