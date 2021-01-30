@@ -161,7 +161,7 @@ class Analyzer(Thread):
         # Start processing all images
         if len(images) > 0:
             self.stdout_lock.acquire()
-            logging.info('[OPEN] Processing ' + str(len(images)) + 'images...')
+            logging.info('[OPEN] Processing ' + str(len(images)) + ' images...')
             self.stdout_lock.release()
         # Get current timestamp
         now = datetime.utcnow().timestamp()
