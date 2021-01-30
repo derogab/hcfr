@@ -5,6 +5,7 @@ import os
 import sys
 import csv
 import time
+import logging
 import schedule
 import distutils.util
 
@@ -15,9 +16,9 @@ from threading import Thread, Lock
 from dotenv import load_dotenv
 from datetime import datetime
 
-
+# Load .env file
 load_dotenv()
-### ENVIRONMENTS ###
+# Environments 
 CAMERA_PATH       = os.getenv("CAMERA_PATH")
 TRAIN_PATH        = os.getenv("TRAIN_PATH")
 MODEL_PATH        = os.getenv("MODEL_PATH")
@@ -27,6 +28,8 @@ DB_LOGS_FILE      = os.getenv("DB_LOGS_FILE")
 CRON_TIME         = int(os.getenv("CRON_TIME"))
 CLEAR_CAMERA_DATA = distutils.util.strtobool(os.getenv("CLEAR_CAMERA_DATA"))
 
+# Init logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 class ImageQueue:
@@ -122,7 +125,7 @@ class ImageProcess:
             for person in res:
                 if person != 'unknown':
                     lock.acquire()
-                    print('[result] ', person, ' found!')
+                    logging.info('[RESULT] ' + person + ' found!')
                     lock.release()
                     # Insert logs
                     with open(self.logs, 'a+', newline='') as write_obj:
@@ -158,7 +161,7 @@ class Analyzer(Thread):
         # Start processing all images
         if len(images) > 0:
             self.stdout_lock.acquire()
-            print('[open] processing ', len(images), ' images...')
+            logging.info('[OPEN] Processing ' + str(len(images)) + 'images...')
             self.stdout_lock.release()
         # Get current timestamp
         now = datetime.utcnow().timestamp()
@@ -171,7 +174,7 @@ class Analyzer(Thread):
         # End 
         if len(images) > 0:
             self.stdout_lock.acquire()
-            print('[close] ', len(images), ' images processed.')
+            logging.info('[CLOSE] ' + str(len(images)) + ' images processed.')
             self.stdout_lock.release()
         
         
@@ -198,19 +201,19 @@ def main():
     # Use global queue
     global queue, queue_lock
     # Start all
-    print('[info] starting...')
+    logging.info('[APP] Starting...')
     # Create observer
     observer = Observer()
     # Init recognition model
     event_handler = NewImageEventHandler(observer, queue, queue_lock)
-    print('[info] recognition model generated.')
+    logging.info('[APP] Recognition model generated.')
     # Schedule job for image recognition process
     schedule.every(CRON_TIME).minutes.do(job)
-    print('[info] process job scheduled.')
+    logging.info('[APP] Process job scheduled.')
     # Schedule event on new image
     observer.schedule(event_handler, CAMERA_PATH, recursive=True)
     observer.start()
-    print('[info] observer listening...')
+    logging.info('[APP] Observer listening...')
     # Run job schedule pending...
     while True:
         schedule.run_pending()
