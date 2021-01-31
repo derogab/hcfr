@@ -131,6 +131,8 @@ class ImageProcess:
             l = l + '#'
         for i in range(0, empty):
             l = l + ' '
+        if empty > 0:
+            l = l + ' '
         l = l + '|'
 
         # Available to print
