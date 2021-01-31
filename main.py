@@ -127,9 +127,9 @@ class ImageProcess:
 
         # Create loader        
         l = '|'
-        for i in range(1, pin):
+        for i in range(0, pin):
             l = l + '#'
-        for i in range(1, empty):
+        for i in range(0, empty):
             l = l + ' '
         l = l + '|'
 
@@ -165,7 +165,7 @@ class ImageProcess:
         total   = self.status['total']
         current = self.status['current']
         perc    = round((current * 100)/total)
-        logging.info('[STATUS] ' + self.loader(perc) + ' ' + str(perc) + '% [' + str(current) + '/' + str(total) + '] for process ' + self.fid)
+        logging.info('[STATUS] ' + self.loader(perc) + ' ' + str(perc) + '% [' + str(current) + '/' + str(total) + '] for ' + self.fid)
 
 
 
