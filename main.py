@@ -114,6 +114,28 @@ class ImageProcess:
         self.timestamp = timestamp if timestamp else datetime.utcnow().timestamp()
         self.logs = os.path.join(DB_PATH, DB_LOGS_FILE)
 
+    def loader(self, perc):
+        
+        # Define
+        max_pin = 20
+
+        # Calculate
+        pin   = round(perc / (100/max_pin))
+        empty = max_pin - pin
+
+        # Create loader        
+        l = '|'
+        for i in range(1, pin):
+            l = l + '#'
+        for i in range(1, empty):
+            l = l + ' '
+        l = l + '|'
+
+        # Available to print
+        return l
+
+
+
     def process(self, lock):
         # Find people in an image
         res = self.recognizer.find_people_in_image(self.src_path, self.model_path)
@@ -140,8 +162,8 @@ class ImageProcess:
         # Log
         total   = self.status['total']
         current = self.status['current']
-        perc    = (current * 100)/total
-        logging.info('[STATUS] ' + str(perc) + '% [' + str(current) + '/' + str(total) + ']')
+        perc    = round((current * 100)/total)
+        logging.info('[STATUS] ' + self.loader(perc) + ' ' + str(perc) + '% [' + str(current) + '/' + str(total) + ']')
 
 
 
