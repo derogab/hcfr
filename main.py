@@ -141,7 +141,7 @@ class ImageProcess:
         total   = self.status['total']
         current = self.status['current']
         perc    = (current * 100)/total
-        logging.info('[STATUS] ' + str(perc) '% [' + str(current) + '/' + str(total) + ']')
+        logging.info('[STATUS] ' + str(perc) + '% [' + str(current) + '/' + str(total) + ']')
 
 
 
