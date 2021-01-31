@@ -5,6 +5,7 @@ import os
 import sys
 import csv
 import time
+import random
 import logging
 import schedule
 import distutils.util
@@ -105,11 +106,12 @@ class NewImageEventHandler(FileSystemEventHandler):
 
 class ImageProcess:
 
-    def __init__(self, src_path, model_path, status, timestamp = None):
+    def __init__(self, src_path, model_path, status, fid, timestamp = None):
         # Set the variables
         self.src_path = src_path
         self.model_path = model_path
         self.status = status
+        self.fid = fid # fantasy id 
         self.recognizer = Recognition()
         self.timestamp = timestamp if timestamp else datetime.utcnow().timestamp()
         self.logs = os.path.join(DB_PATH, DB_LOGS_FILE)
@@ -163,7 +165,7 @@ class ImageProcess:
         total   = self.status['total']
         current = self.status['current']
         perc    = round((current * 100)/total)
-        logging.info('[STATUS] ' + self.loader(perc) + ' ' + str(perc) + '% [' + str(current) + '/' + str(total) + ']')
+        logging.info('[STATUS] ' + self.loader(perc) + ' ' + str(perc) + '% [' + str(current) + '/' + str(total) + '] for process ' + self.fid)
 
 
 
@@ -176,6 +178,20 @@ class Analyzer(Thread):
         self.stdout_lock, self.queue_lock = locks
         # Get queue
         self.queue = queue
+
+    def fantasy_id_generator(self):
+
+        colors  = ['white', 'green', 'purple', 'black', 'blue', 'yellow', 'red', 'orange']
+        animals = ['dog', 'cat', 'pig', 'duck', 'horse', 'bird', 'alpaca', 'goat', 'donkey', 
+                   'buffalo', 'cobra', 'condor', 'dragon', 'elephant', 'lion', 'scorpion', 
+                   'koala', 'leopard', 'panda', 'parrot', 'snake', 'whale', 'chicken']
+
+        random_animal = animals[random.randint(0,len(animals)-1)]
+        random_color  = colors[random.randint(0,len(colors)-1)]
+
+        fantasy_id = random_color + '-' + random_animal
+
+        return fantasy_id
 
     def run(self):
         # Lock the queue
@@ -193,6 +209,8 @@ class Analyzer(Thread):
             self.stdout_lock.release()
         # Get current timestamp
         now = datetime.utcnow().timestamp()
+        # Create a maybe-unique ID 
+        fid = self.fantasy_id_generator()
         # Process each image
         counter = 0
         total = len(images)
@@ -205,7 +223,7 @@ class Analyzer(Thread):
                 'total': total
             }
             # Create tool to process image
-            f = ImageProcess(image, os.path.join(MODEL_PATH, MODEL_FILE), status, now)
+            f = ImageProcess(image, os.path.join(MODEL_PATH, MODEL_FILE), status, fid, now)
             # Process this image
             f.process(self.stdout_lock)
         # End 
