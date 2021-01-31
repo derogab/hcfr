@@ -105,10 +105,11 @@ class NewImageEventHandler(FileSystemEventHandler):
 
 class ImageProcess:
 
-    def __init__(self, src_path, model_path, timestamp = None):
+    def __init__(self, src_path, model_path, status, timestamp = None):
         # Set the variables
         self.src_path = src_path
         self.model_path = model_path
+        self.status = status
         self.recognizer = Recognition()
         self.timestamp = timestamp if timestamp else datetime.utcnow().timestamp()
         self.logs = os.path.join(DB_PATH, DB_LOGS_FILE)
@@ -136,6 +137,11 @@ class ImageProcess:
         # Remove image
         if CLEAR_CAMERA_DATA:
             os.remove(self.src_path)
+        # Log
+        total   = self.status['total']
+        current = self.status['current']
+        perc    = (current * 100)/total
+        logging.info('[STATUS] ' + str(perc) '% [' + str(current) + '/' + str(total) + ']')
 
 
 
@@ -166,9 +172,18 @@ class Analyzer(Thread):
         # Get current timestamp
         now = datetime.utcnow().timestamp()
         # Process each image
+        counter = 0
+        total = len(images)
         for image in images:
+            # Count 
+            counter = counter + 1
+            # Create status
+            status = {
+                'current': counter,
+                'total': total
+            }
             # Create tool to process image
-            f = ImageProcess(image, os.path.join(MODEL_PATH, MODEL_FILE), now)
+            f = ImageProcess(image, os.path.join(MODEL_PATH, MODEL_FILE), status, now)
             # Process this image
             f.process(self.stdout_lock)
         # End 
