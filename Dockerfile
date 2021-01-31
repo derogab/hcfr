@@ -70,7 +70,7 @@ RUN cd ~ && \
     sed -i 's/opencv-python-headless/opencv-python/' setup.py && \
     python3 setup.py install
 # Install hcfr requirements
-RUN python3 -m pip install wheel setuptools python-dotenv dlib watchdog schedule logging people-finder
+RUN python3 -m pip install wheel setuptools python-dotenv dlib watchdog schedule people-finder
 # Set working directory
 WORKDIR /app
 # Copy app 
