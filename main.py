@@ -5,6 +5,8 @@ import os
 import sys
 import csv
 import time
+import random
+import logging
 import schedule
 import distutils.util
 
@@ -15,9 +17,9 @@ from threading import Thread, Lock
 from dotenv import load_dotenv
 from datetime import datetime
 
-
+# Load .env file
 load_dotenv()
-### ENVIRONMENTS ###
+# Environments 
 CAMERA_PATH       = os.getenv("CAMERA_PATH")
 TRAIN_PATH        = os.getenv("TRAIN_PATH")
 MODEL_PATH        = os.getenv("MODEL_PATH")
@@ -27,6 +29,8 @@ DB_LOGS_FILE      = os.getenv("DB_LOGS_FILE")
 CRON_TIME         = int(os.getenv("CRON_TIME"))
 CLEAR_CAMERA_DATA = distutils.util.strtobool(os.getenv("CLEAR_CAMERA_DATA"))
 
+# Init logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 class ImageQueue:
@@ -102,17 +106,47 @@ class NewImageEventHandler(FileSystemEventHandler):
 
 class ImageProcess:
 
-    def __init__(self, src_path, model_path, timestamp = None):
+    def __init__(self, src_path, model_path, status, fid, timestamp = None):
         # Set the variables
         self.src_path = src_path
         self.model_path = model_path
+        self.status = status
+        self.fid = fid # fantasy id 
         self.recognizer = Recognition()
         self.timestamp = timestamp if timestamp else datetime.utcnow().timestamp()
         self.logs = os.path.join(DB_PATH, DB_LOGS_FILE)
 
+    def loader(self, perc):
+        
+        # Define
+        max_pin = 20
+
+        # Calculate
+        pin   = round(perc / (100/max_pin))
+        empty = max_pin - pin
+
+        # Create loader        
+        l = '|'
+        for i in range(0, pin):
+            l = l + '#'
+        for i in range(0, empty):
+            l = l + ' '
+        l = l + '|'
+
+        # Available to print
+        return l
+
+
+
     def process(self, lock):
         # Find people in an image
-        res = self.recognizer.find_people_in_image(self.src_path, self.model_path)
+        res = []
+        try:
+            res = self.recognizer.find_people_in_image(self.src_path, self.model_path)
+        except:
+            logging.error('[ERROR] Process failed w/ ' + self.src_path)
+            return # exit
+
         # Check if people have been found
         if len(res):
             # Get photo time or use analysis timestamp
@@ -122,7 +156,7 @@ class ImageProcess:
             for person in res:
                 if person != 'unknown':
                     lock.acquire()
-                    print('[result] ', person, ' found!')
+                    logging.info('[RESULT] ' + person + ' found!')
                     lock.release()
                     # Insert logs
                     with open(self.logs, 'a+', newline='') as write_obj:
@@ -130,9 +164,16 @@ class ImageProcess:
                         csv_writer = csv.writer(write_obj)
                         # Add contents of list as last row in the csv file
                         csv_writer.writerow([person, self.timestamp])
+
         # Remove image
         if CLEAR_CAMERA_DATA:
             os.remove(self.src_path)
+        
+        # Log
+        total   = self.status['total']
+        current = self.status['current']
+        perc    = round((current * 100)/total)
+        logging.info('[STATUS] ' + self.loader(perc) + ' ' + str(perc) + '% [' + str(current) + '/' + str(total) + '] for ' + self.fid)
 
 
 
@@ -146,6 +187,20 @@ class Analyzer(Thread):
         # Get queue
         self.queue = queue
 
+    def fantasy_id_generator(self):
+
+        colors  = ['white', 'green', 'purple', 'black', 'blue', 'yellow', 'red', 'orange']
+        animals = ['dog', 'cat', 'pig', 'duck', 'horse', 'bird', 'alpaca', 'goat', 'donkey', 
+                   'buffalo', 'cobra', 'condor', 'dragon', 'elephant', 'lion', 'scorpion', 
+                   'koala', 'leopard', 'panda', 'parrot', 'snake', 'whale', 'chicken']
+
+        random_animal = animals[random.randint(0,len(animals)-1)]
+        random_color  = colors[random.randint(0,len(colors)-1)]
+
+        fantasy_id = random_color + '-' + random_animal
+
+        return fantasy_id
+
     def run(self):
         # Lock the queue
         self.queue_lock.acquire()
@@ -158,20 +213,31 @@ class Analyzer(Thread):
         # Start processing all images
         if len(images) > 0:
             self.stdout_lock.acquire()
-            print('[open] processing ', len(images), ' images...')
+            logging.info('[OPEN] Processing ' + str(len(images)) + ' images...')
             self.stdout_lock.release()
         # Get current timestamp
         now = datetime.utcnow().timestamp()
+        # Create a maybe-unique ID 
+        fid = self.fantasy_id_generator()
         # Process each image
+        counter = 0
+        total = len(images)
         for image in images:
+            # Count 
+            counter = counter + 1
+            # Create status
+            status = {
+                'current': counter,
+                'total': total
+            }
             # Create tool to process image
-            f = ImageProcess(image, os.path.join(MODEL_PATH, MODEL_FILE), now)
+            f = ImageProcess(image, os.path.join(MODEL_PATH, MODEL_FILE), status, fid, now)
             # Process this image
             f.process(self.stdout_lock)
         # End 
         if len(images) > 0:
             self.stdout_lock.acquire()
-            print('[close] ', len(images), ' images processed.')
+            logging.info('[CLOSE] ' + str(len(images)) + ' images processed.')
             self.stdout_lock.release()
         
         
@@ -198,19 +264,19 @@ def main():
     # Use global queue
     global queue, queue_lock
     # Start all
-    print('[info] starting...')
+    logging.info('[APP] Starting...')
     # Create observer
     observer = Observer()
     # Init recognition model
     event_handler = NewImageEventHandler(observer, queue, queue_lock)
-    print('[info] recognition model generated.')
+    logging.info('[APP] Recognition model generated.')
     # Schedule job for image recognition process
     schedule.every(CRON_TIME).minutes.do(job)
-    print('[info] process job scheduled.')
+    logging.info('[APP] Process job scheduled.')
     # Schedule event on new image
     observer.schedule(event_handler, CAMERA_PATH, recursive=True)
     observer.start()
-    print('[info] observer listening...')
+    logging.info('[APP] Observer listening...')
     # Run job schedule pending...
     while True:
         schedule.run_pending()
