@@ -140,7 +140,13 @@ class ImageProcess:
 
     def process(self, lock):
         # Find people in an image
-        res = self.recognizer.find_people_in_image(self.src_path, self.model_path)
+        res = []
+        try:
+            res = self.recognizer.find_people_in_image(self.src_path, self.model_path)
+        except:
+            logging.error('[ERROR] Process failed w/ ' + self.src_path)
+            return # exit
+
         # Check if people have been found
         if len(res):
             # Get photo time or use analysis timestamp
@@ -158,9 +164,11 @@ class ImageProcess:
                         csv_writer = csv.writer(write_obj)
                         # Add contents of list as last row in the csv file
                         csv_writer.writerow([person, self.timestamp])
+
         # Remove image
         if CLEAR_CAMERA_DATA:
             os.remove(self.src_path)
+        
         # Log
         total   = self.status['total']
         current = self.status['current']
