@@ -158,6 +158,8 @@ class ImageProcess:
                     lock.acquire()
                     logging.info('[RESULT] ' + person + ' found!')
                     lock.release()
+                    # Convert timestamp to iso format
+                    self.timestamp = datetime.fromtimestamp(self.timestamp).isoformat()
                     # Insert logs
                     with open(self.logs, 'a+', newline='') as write_obj:
                         # Create a writer object from csv module
