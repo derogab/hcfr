@@ -45,7 +45,7 @@ RUN cd ~ && \
     mkdir -p scipy && \
     git clone --single-branch https://github.com/scipy/scipy.git scipy/ && \
     cd scipy/ && \
-    pip install .
+    python3 setup.py install
 # Install scikit-learn
 RUN cd ~ && \
     mkdir -p scikit-learn && \
