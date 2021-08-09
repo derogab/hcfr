@@ -7,7 +7,7 @@ RUN apt-get update && \
     rm -rf /tmp/* /var/tmp/*
 # Install PIP / Python packages
 RUN pip install --upgrade pip && \
-    pip install wheel setuptools python-dotenv dlib watchdog schedule people-finder
+    pip install python-dotenv watchdog schedule people-finder
 
 # Set working directory
 WORKDIR /app
