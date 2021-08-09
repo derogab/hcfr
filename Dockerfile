@@ -28,7 +28,7 @@ RUN apt-get -y update && \
 # Install PIP / Python packages
 RUN python3 -m pip install wheel setuptools 
 RUN python3 -m pip install Cython
-RUN python3 -m pip python-dotenv dlib watchdog schedule people-finder
+RUN python3 -m pip install python-dotenv dlib watchdog schedule people-finder
 
 # Set working directory
 WORKDIR /app
