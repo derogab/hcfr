@@ -41,11 +41,7 @@ RUN cd ~ && \
     cd numpy/ && \
     pip install . 
 # Install scipy
-RUN cd ~ && \
-    mkdir -p scipy && \
-    git clone --single-branch https://github.com/scipy/scipy.git scipy/ && \
-    cd scipy/ && \
-    python3 setup.py install
+RUN pip install scipy
 # Install scikit-learn
 RUN cd ~ && \
     mkdir -p scikit-learn && \
