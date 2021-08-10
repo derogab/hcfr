@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3-slim
 
 ### Install APT packages ###
 RUN apt-get update && \
@@ -25,7 +25,8 @@ RUN apt-get update && \
         zip \
     && apt-get clean && rm -rf /tmp/* /var/tmp/*
 
-### Install packages from sources ###
+### Install PIP / Python packages ###
+RUN pip install --upgrade pip
 # Install dlib
 RUN cd ~ && \
     mkdir -p dlib && \
@@ -35,31 +36,15 @@ RUN cd ~ && \
 # Install Cython
 RUN pip install Cython
 # Install numpy
-RUN cd ~ && \
-    mkdir -p numpy && \
-    git clone --single-branch https://github.com/numpy/numpy.git numpy/ && \
-    cd numpy/ && \
-    pip install . 
+RUN pip install numpy 
 # Install scipy
 RUN pip install scipy
 # Install scikit-learn
-RUN cd ~ && \
-    mkdir -p scikit-learn && \
-    git clone --single-branch https://github.com/scikit-learn/scikit-learn.git scikit-learn/ && \
-    cd scikit-learn/ && \
-    pip install .
+RUN pip install scikit-learn
 # Install scikit-build
-RUN cd ~ && \
-    mkdir -p scikit-build && \
-    git clone --single-branch https://github.com/scikit-build/scikit-build.git scikit-build/ && \
-    cd scikit-build/ && \
-    pip install .
+RUN pip install scikit-build
 # Install opencv-python
-RUN cd ~ && \
-    mkdir -p opencv-python && \
-    git clone --single-branch https://github.com/skvark/opencv-python.git opencv-python/ && \
-    cd opencv-python/ && \
-    pip install .
+RUN pip install opencv-python
 # Install people-finder
 RUN cd ~ && \
     mkdir -p people-finder && \
@@ -67,9 +52,7 @@ RUN cd ~ && \
     cd people-finder/ && \
     pip install .
 
-### Install PIP / Python packages ###
-RUN pip install --upgrade pip && \
-    pip install python-dotenv watchdog schedule people-finder
+RUN pip install python-dotenv watchdog schedule people-finder
 
 ### Load app ###
 # Set working directory
