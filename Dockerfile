@@ -38,7 +38,11 @@ RUN pip install Cython
 # Install numpy
 RUN pip install numpy 
 # Install scipy
-RUN pip install scipy
+RUN cd ~ && \
+    mkdir -p scipy && \
+    git clone --single-branch https://github.com/scipy/scipy.git scipy/ && \
+    cd  scipy/ && \
+    python setup.py install 
 # Install scikit-learn
 RUN pip install scikit-learn
 # Install scikit-build
@@ -61,4 +65,4 @@ WORKDIR /app
 COPY . .
 
 ### Run the app ###
-CMD ["python3", "-u", "/app/main.py"]
+CMD ["python", "-u", "/app/main.py"]
