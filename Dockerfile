@@ -37,8 +37,8 @@ RUN cd ~ && \
 RUN pip install Cython
 # Install numpy
 RUN pip install numpy 
-# Install pybindd11
-RUN pip install pybindd11
+# Install pybind11
+RUN pip install pybind11
 # Install scipy
 RUN cd ~ && \
     mkdir -p scipy && \
