@@ -39,6 +39,8 @@ RUN pip install Cython
 RUN pip install numpy 
 # Install pybind11
 RUN pip install pybind11
+# Install pythran
+RUN pip install pythran
 # Install scipy
 RUN cd ~ && \
     mkdir -p scipy && \
