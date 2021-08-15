@@ -46,6 +46,8 @@ RUN cd ~ && \
     mkdir -p scipy && \
     git clone --single-branch https://github.com/scipy/scipy.git scipy/ && \
     cd  scipy/ && \
+    git submodule update --init && \
+    git submodule update --remote --recursive && \
     python setup.py install 
 # Install scikit-learn
 RUN pip install scikit-learn
