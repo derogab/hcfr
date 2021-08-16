@@ -41,7 +41,7 @@ RUN cd ~ && \
     git clone --single-branch https://github.com/scipy/scipy.git scipy/ && \
     cd  scipy/ && \
     git submodule update --init && \
-    python setup.py install 
+    pip install .
 # Install other requirements
 RUN pip install scikit-learn scikit-build opencv-python
 # Install people-finder
