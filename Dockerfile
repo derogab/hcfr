@@ -27,40 +27,30 @@ RUN apt-get update && \
 
 ### Install PIP / Python packages ###
 RUN pip install --upgrade pip
-# Install dlib
+# Build & install dlib
 RUN cd ~ && \
     mkdir -p dlib && \
     git clone --single-branch https://github.com/davisking/dlib.git dlib/ && \
     cd  dlib/ && \
     pip install . 
-# Install Cython
-RUN pip install Cython
-# Install numpy
-RUN pip install numpy 
-# Install pybind11
-RUN pip install pybind11
-# Install pythran
-RUN pip install pythran
-# Install scipy
+# Install scipy requirements
+RUN pip install Cython numpy pybind11 pythran
+# Build & install scipy
 RUN cd ~ && \
     mkdir -p scipy && \
     git clone --single-branch https://github.com/scipy/scipy.git scipy/ && \
     cd  scipy/ && \
     git submodule update --init && \
     python setup.py install 
-# Install scikit-learn
-RUN pip install scikit-learn
-# Install scikit-build
-RUN pip install scikit-build
-# Install opencv-python
-RUN pip install opencv-python
+# Install other requirements
+RUN pip install scikit-learn scikit-build opencv-python
 # Install people-finder
 RUN cd ~ && \
     mkdir -p people-finder && \
     git clone --single-branch https://github.com/derogab/people-finder.git people-finder/ && \
     cd people-finder/ && \
     pip install .
-
+# Install last requirements
 RUN pip install python-dotenv watchdog schedule people-finder
 
 ### Load app ###
