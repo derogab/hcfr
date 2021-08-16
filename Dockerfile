@@ -35,13 +35,8 @@ RUN cd ~ && \
     pip install . 
 # Install scipy requirements
 RUN pip install Cython numpy pybind11 pythran
-# Build & install scipy
-RUN cd ~ && \
-    mkdir -p scipy && \
-    git clone --single-branch https://github.com/scipy/scipy.git scipy/ && \
-    cd  scipy/ && \
-    git submodule update --init && \
-    pip install .
+# Install scipy
+RUN pip install scipy
 # Install other requirements
 RUN pip install scikit-learn scikit-build opencv-python
 # Install people-finder
