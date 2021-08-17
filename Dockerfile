@@ -33,12 +33,8 @@ RUN cd ~ && \
     git clone --single-branch https://github.com/davisking/dlib.git dlib/ && \
     cd  dlib/ && \
     pip install . --use-feature=in-tree-build
-# Install scipy requirements
-RUN pip install Cython numpy pybind11 pythran --use-feature=in-tree-build
-# Install scipy
-RUN pip install scipy --use-feature=in-tree-build
-# Install other requirements
-RUN pip install scikit-learn scikit-build opencv-python --use-feature=in-tree-build
+# Install first requirements
+RUN pip install --use-feature=in-tree-build Cython numpy pybind11 pythran scipy scikit-learn scikit-build opencv-python --use-feature=in-tree-build
 # Install people-finder
 RUN cd ~ && \
     mkdir -p people-finder && \
