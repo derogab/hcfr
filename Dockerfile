@@ -26,27 +26,27 @@ RUN apt-get update && \
     && apt-get clean && rm -rf /tmp/* /var/tmp/*
 
 ### Install PIP / Python packages ###
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip --use-feature=in-tree-build
 # Build & install dlib
 RUN cd ~ && \
     mkdir -p dlib && \
     git clone --single-branch https://github.com/davisking/dlib.git dlib/ && \
     cd  dlib/ && \
-    pip install . 
+    pip install . --use-feature=in-tree-build
 # Install scipy requirements
-RUN pip install Cython numpy pybind11 pythran
+RUN pip install Cython numpy pybind11 pythran --use-feature=in-tree-build
 # Install scipy
-RUN pip install scipy
+RUN pip install scipy --use-feature=in-tree-build
 # Install other requirements
-RUN pip install scikit-learn scikit-build opencv-python
+RUN pip install scikit-learn scikit-build opencv-python --use-feature=in-tree-build
 # Install people-finder
 RUN cd ~ && \
     mkdir -p people-finder && \
     git clone --single-branch https://github.com/derogab/people-finder.git people-finder/ && \
     cd people-finder/ && \
-    pip install .
+    pip install . --use-feature=in-tree-build
 # Install last requirements
-RUN pip install python-dotenv watchdog schedule people-finder
+RUN pip install python-dotenv watchdog schedule people-finder --use-feature=in-tree-build
 
 ### Load app ###
 # Set working directory
