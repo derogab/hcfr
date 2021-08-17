@@ -27,12 +27,8 @@ RUN apt-get update && \
 
 ### Install PIP / Python packages ###
 RUN pip install --upgrade pip --use-feature=in-tree-build
-# Build & install dlib
-RUN cd ~ && \
-    mkdir -p dlib && \
-    git clone --single-branch https://github.com/davisking/dlib.git dlib/ && \
-    cd  dlib/ && \
-    pip install . --use-feature=in-tree-build
+# Install dlib
+RUN pip install dlib --use-feature=in-tree-build
 # Install first requirements
 RUN pip install --use-feature=in-tree-build Cython numpy pybind11 pythran scipy scikit-learn scikit-build opencv-python --use-feature=in-tree-build
 # Install people-finder
