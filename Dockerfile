@@ -1,6 +1,9 @@
-FROM python:3
+FROM jupyter/scipy-notebook:latest
 
 ### Install APT packages ###
+# Need to be root to install apt packages in jupyter/scipy-notebook
+USER root
+# Then install all useful packages
 RUN apt-get update && \
     apt-get install -y --fix-missing \
         build-essential \
@@ -24,6 +27,8 @@ RUN apt-get update && \
         software-properties-common \
         zip \
     && apt-get clean && rm -rf /tmp/* /var/tmp/*
+# After all packages have been installed reverts to 'normal' user of jupyter/scipy-notebook
+USER ${NB_UID}
 
 ### Install PIP / Python packages ###
 RUN pip install --upgrade pip --use-feature=in-tree-build
