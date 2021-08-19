@@ -1,49 +1,33 @@
-FROM jupyter/scipy-notebook:latest
+FROM alpine:latest
 
 ### Install APT packages ###
-# Need to be root to install apt packages in jupyter/scipy-notebook
-USER root
-# Then install all useful packages
-RUN apt-get update && \
-    apt-get install -y --fix-missing \
-        build-essential \
-        cmake \
-        gfortran \
-        git \
-        wget \
-        curl \
+RUN apk update \
+    && apk add --upgrade --no-cache \
+        bash openssh curl ca-certificates openssl less htop \
+		g++ make cmake git wget rsync zip \
+        build-base libpng-dev freetype-dev libexecinfo-dev openblas-dev libgomp lapack-dev \
+		libgcc libquadmath musl  \
+		gfortran libgfortran \
         graphicsmagick \
-        libgraphicsmagick1-dev \
-        libatlas-base-dev \
-        libavcodec-dev \
-        libavformat-dev \
-        libgtk2.0-dev \
-        libjpeg-dev \
-        liblapack-dev \
-        libswscale-dev \
-        pkg-config \
-        python3-dev \
-        python3-numpy \
-        software-properties-common \
-        zip \
-    && apt-get clean && rm -rf /tmp/* /var/tmp/*
-# After all packages have been installed reverts to 'normal' user of jupyter/scipy-notebook
-USER ${NB_UID}
+        python3 python3-dev py3-pip py3-scipy \
+    && rm -rf /tmp/* /var/tmp/* /root/.cache \
+	&& pip install --no-cache-dir --upgrade pip 
 
 ### Install PIP / Python packages ###
-RUN pip install --upgrade pip --use-feature=in-tree-build
 # Install dlib
-RUN pip install dlib --use-feature=in-tree-build
+RUN pip install dlib
 # Install first requirements
-RUN pip install --use-feature=in-tree-build Cython numpy pybind11 pythran scipy scikit-learn scikit-build opencv-python --use-feature=in-tree-build
+RUN pip install \
+        Cython numpy pybind11 pythran \
+        scipy scikit-learn scikit-build opencv-python
 # Install people-finder
 RUN cd ~ && \
     mkdir -p people-finder && \
     git clone --single-branch https://github.com/derogab/people-finder.git people-finder/ && \
     cd people-finder/ && \
-    pip install . --use-feature=in-tree-build
+    pip install .
 # Install last requirements
-RUN pip install python-dotenv watchdog schedule people-finder --use-feature=in-tree-build
+RUN pip install python-dotenv watchdog schedule people-finder
 
 ### Load app ###
 # Set working directory
