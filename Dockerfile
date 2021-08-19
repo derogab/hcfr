@@ -11,7 +11,7 @@ RUN apk update \
         graphicsmagick \
         python3 python3-dev py3-pip py3-scipy \
     && rm -rf /tmp/* /var/tmp/* /root/.cache \
-	&& pip install --no-cache-dir --upgrade pip 
+	&& pip install --no-cache-dir --upgrade pip setuptools wheel
 
 ### Install PIP / Python packages ###
 # Install dlib
