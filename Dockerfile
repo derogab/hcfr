@@ -4,7 +4,7 @@ FROM alpine:latest
 RUN apk update \
     && apk add --upgrade --no-cache \
         bash openssh curl ca-certificates openssl less htop \
-		g++ make cmake git wget rsync zip \
+		g++ make cmake ninja git wget rsync zip \
         build-base libpng-dev freetype-dev libexecinfo-dev openblas-dev libgomp lapack-dev \
 		libgcc libquadmath musl  \
 		gfortran libgfortran \
