@@ -12,21 +12,19 @@ RUN apk update \
         graphicsmagick jpeg-dev \
         python3 python3-dev py3-pip py3-scipy py3-numpy \
     && rm -rf /tmp/* /var/tmp/* /root/.cache \
-	&& pip install --no-cache-dir --upgrade pip setuptools wheel
+	&& python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
 ### Install PIP / Python packages ###
-# Install dlib
-RUN pip install dlib
 # Install first requirements
-RUN pip install \
-        Cython pybind11 pythran \
-        scipy scikit-learn scikit-build
+RUN python3 -m pip install dlib Cython pybind11 pythran
 # Install numpy
 RUN cd ~ && \
     mkdir -p numpy && \
     git clone --single-branch https://github.com/numpy/numpy.git numpy/ && \
     cd numpy/ && \
     python3 setup.py install
+# Install other requirements
+RUN python3 -m pip install scipy scikit-learn scikit-build
 # Install opencv-python-headless
 RUN cd ~ && \
     mkdir -p opencv-python && \
@@ -38,9 +36,9 @@ RUN cd ~ && \
     mkdir -p people-finder && \
     git clone --single-branch https://github.com/derogab/people-finder.git people-finder/ && \
     cd people-finder/ && \
-    pip install .
+    python3 -m pip install .
 # Install last requirements
-RUN pip install python-dotenv watchdog schedule people-finder
+RUN python3 -m pip install python-dotenv watchdog schedule people-finder
 
 ### Load app ###
 # Set working directory
