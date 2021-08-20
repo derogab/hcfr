@@ -22,7 +22,7 @@ RUN cd ~ && \
     mkdir -p numpy && \
     git clone --single-branch https://github.com/numpy/numpy.git numpy/ && \
     cd numpy/ && \
-    python3 setup.py install
+    python3 -m pip install .
 # Install other requirements
 RUN python3 -m pip install scipy scikit-learn scikit-build
 # Install opencv-python-headless
