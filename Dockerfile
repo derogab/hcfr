@@ -7,7 +7,7 @@ RUN apk update \
         bash openssh curl ca-certificates openssl less htop \
 		g++ make cmake ninja git wget rsync zip gcc libc-dev zlib-dev \
         build-base libpng-dev freetype-dev libexecinfo-dev openblas-dev libgomp lapack-dev \
-		libgcc libquadmath musl  \
+		libgcc musl  \
 		gfortran libgfortran \
         graphicsmagick jpeg-dev \
         python3 python3-dev py3-pip py3-scipy py3-numpy \
