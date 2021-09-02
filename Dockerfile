@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM ghcr.io/dockerfast/python-scipy:latest
 
 RUN apk update \
     # Install APT packages
@@ -14,15 +14,11 @@ RUN apk update \
     # Remove tmp files
     && rm -rf /tmp/* /var/tmp/* /root/.cache \
     # Upgrade PIP and build tools
-	&& python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
     # Install first requirements
     && python3 -m pip install dlib Cython pybind11 pythran \
     # Build & install numpy
-    && cd ~ && \
-    mkdir -p numpy && \
-    git clone --single-branch https://github.com/numpy/numpy.git numpy/ && \
-    cd numpy/ && \
-    python3 -m pip install . \
+    && python3 -m pip install numpy \
     # Install other requirements
     && python3 -m pip install scipy scikit-learn scikit-build \
     # Build & install opencv-python-headless
