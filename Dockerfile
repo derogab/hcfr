@@ -1,4 +1,4 @@
-FROM ghcr.io/dockerfast/python-scipy:latest
+FROM ghcr.io/dockerfast/python-scikit:latest
 
 RUN apk update \
     # Install APT packages
