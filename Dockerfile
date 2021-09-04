@@ -22,11 +22,7 @@ RUN apk update \
     # Install other requirements
     && python3 -m pip install scipy scikit-learn scikit-build \
     # Build & install opencv-python-headless
-    && cd ~ && \
-    mkdir -p opencv-python && \
-    git clone --single-branch https://github.com/skvark/opencv-python.git opencv-python/ && \
-    cd opencv-python/ && \
-    ENABLE_HEADLESS=1 python3 setup.py install \
+    && python3 -m pip install opencv-python-headless \
     # Build & install people-finder
     && cd ~ && \
     mkdir -p people-finder && \
