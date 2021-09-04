@@ -4,7 +4,7 @@ RUN apk update \
     # Install APT packages
     && apk add --upgrade --no-cache \
         linux-headers \
-        bash openssh curl ca-certificates openssl less htop \
+        bash openssh curl ca-certificates openssl openssl-libs-static less htop \
 		g++ make cmake ninja git wget rsync zip gcc libc-dev zlib-dev \
         build-base libpng-dev freetype-dev libexecinfo-dev openblas-dev libgomp lapack-dev \
 		libgcc musl  \
