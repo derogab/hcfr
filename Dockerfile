@@ -23,14 +23,14 @@ RUN apt-get update \
         python3-numpy \
         software-properties-common \
         zip \
-    # Build & install dlib
-    && cd ~ \
+    # Build & Install dlib
+    && cd /opt \
     && mkdir -p dlib \
     && git clone -b 'v19.9' --single-branch https://github.com/davisking/dlib.git dlib/ \
     && cd  dlib/ \
     && python3 setup.py install --yes USE_AVX_INSTRUCTIONS \
     # Upgrade build tools
-    python3 -m pip install --no-cache-dir --upgrade setuptools wheel \
+    && python3 -m pip install --no-cache-dir --upgrade setuptools wheel \
     # Install requirements
     && python3 -m pip install --no-cache-dir \
         dlib python-dotenv watchdog schedule people-finder \
