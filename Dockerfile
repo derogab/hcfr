@@ -1,28 +1,48 @@
-FROM ghcr.io/dockerfast/python-scikit:latest
+FROM ghcr.io/dockerfast/python-opencv-headless:latest
 
-RUN apk update \
+RUN apt-get update \
+    # Prevent endless waiting
+    && DEBIAN_FRONTEND=noninteractive \
+    # Set UTC as timezone
+    && ln -snf /usr/share/zoneinfo/UTC /etc/localtime \
     # Install APT packages
-    && apk add --upgrade --no-cache \
-        linux-headers \
-        bash openssh curl ca-certificates openssl openssl-libs-static less htop \
-		g++ make cmake ninja git wget rsync zip gcc libc-dev zlib-dev \
-        build-base libpng-dev freetype-dev libexecinfo-dev openblas-dev libgomp lapack-dev \
-		libgcc musl  \
-		gfortran libgfortran \
-        graphicsmagick jpeg-dev \
-        python3 python3-dev py3-pip py3-scipy py3-numpy \
+    && apt-get install -y --fix-missing \
+        build-essential \
+        make \
+        cmake \
+        g++ \
+        cpp \
+        gfortran \
+        git \
+        wget \
+        curl \
+        graphicsmagick \
+        libgraphicsmagick1-dev \
+        libatlas-base-dev \
+        libavcodec-dev \
+        libavformat-dev \
+        libgtk2.0-dev \
+        libjpeg-dev \
+        liblapack-dev \
+        libswscale-dev \
+        pkg-config \
+        python3-dev \
+        python3-numpy \
+        python3-numpy-dev \
+        python3-scipy \
+        software-properties-common \
+        zip \
     # Remove tmp files
-    && rm -rf /tmp/* /var/tmp/* /root/.cache \
+    && apt-get clean && rm -rf /tmp/* /var/tmp/* \
+    # Add PiWheels support
+    && echo "[global]\nextra-index-url=https://www.piwheels.org/simple" >> /etc/pip.conf \
     # Upgrade PIP and build tools
     && python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
-    # Install first requirements
-    && python3 -m pip install dlib Cython pybind11 pythran \
-    # Build & install numpy
-    && python3 -m pip install numpy \
-    # Install other requirements
-    && python3 -m pip install scipy scikit-learn scikit-build \
-    # Build & install opencv-python-headless
-    && python3 -m pip install opencv-python-headless \
+    # Install requirements
+    && python3 -m pip install --no-cache-dir \
+        dlib cython pybind11 pythran \
+        numpy scipy scikit-learn scikit-build \
+	opencv-python-headless \
     # Build & install people-finder
     && cd ~ && \
     mkdir -p people-finder && \
