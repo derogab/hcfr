@@ -24,7 +24,7 @@ RUN apt-get update \
         software-properties-common \
         zip \
     # Build & install dlib
-    && cd /opt \
+    && cd ~ \
     && mkdir -p dlib \
     && git clone -b 'v19.9' --single-branch https://github.com/davisking/dlib.git dlib/ \
     && cd  dlib/ \
