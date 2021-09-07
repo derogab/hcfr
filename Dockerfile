@@ -34,8 +34,6 @@ RUN apt-get update \
         zip \
     # Remove tmp files
     && apt-get clean && rm -rf /tmp/* /var/tmp/* \
-    # Add PiWheels support
-    && echo "[global]\nextra-index-url=https://www.piwheels.org/simple" >> /etc/pip.conf \
     # Upgrade PIP and build tools
     && python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
     # Install requirements
