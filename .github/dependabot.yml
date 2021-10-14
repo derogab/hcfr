@@ -16,3 +16,14 @@ updates:
       - 'derogab'
     labels:
       - 'dependencies'
+
+  # Maintain dependencies for PIP
+  - package-ecosystem: 'pip'
+    directory: '/'
+    target-branch: 'dev'
+    schedule:
+      interval: 'daily'
+    assignees:
+      - 'derogab'
+    labels:
+      - 'dependencies'
