@@ -1,11 +1,33 @@
 FROM ghcr.io/dockerfast/python-opencv-headless:latest
 
 RUN apt-get update \
+    # Install dependencies and build tools
+    && apt-get install -y --fix-missing \
+        build-essential \
+        cmake \
+        gfortran \
+        git \
+        wget \
+        curl \
+        graphicsmagick \
+        libgraphicsmagick1-dev \
+        libatlas-base-dev \
+        libavcodec-dev \
+        libavformat-dev \
+        libgtk2.0-dev \
+        libjpeg-dev \
+        liblapack-dev \
+        libswscale-dev \
+        pkg-config \
+        python3-dev \
+        python3-numpy \
+        software-properties-common \
+        zip \
     # Install requirements
     && python3 -m pip install --no-cache-dir \
         dlib python-dotenv watchdog schedule people-finder \
     # Remove tmp files
-    && rm -rf /tmp/* /var/tmp/*
+    && apt-get clean && rm -rf /tmp/* /var/tmp/*
 
 ### Load app ###
 # Set working directory
