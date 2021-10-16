@@ -31,6 +31,7 @@ jobs:
 
   # Run tests.
   test:
+    name: Test
     runs-on: self-hosted
 
     steps:
@@ -51,6 +52,7 @@ jobs:
     # Ensure test job passes before pushing image.
     needs: test
 
+    name: Build & Push to GitHub Registry
     runs-on: self-hosted
     permissions:
       contents: read
@@ -101,6 +103,7 @@ jobs:
     # Ensure test job passes before pushing image.
     needs: test
 
+    name: Build & Push to Docker Hub
     runs-on: self-hosted
     permissions:
       contents: read
