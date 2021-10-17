@@ -36,7 +36,7 @@ RUN apt-get -y update \
     && python3 -m pip install --no-cache-dir --upgrade pip
 
 # Install hcfr requirements
-RUN python3 -m pip install wheel setuptools Cython python-dotenv dlib watchdog schedule people-finder
+RUN python3 -m pip install python-dotenv dlib watchdog schedule people-finder
 # Set working directory
 WORKDIR /app
 # Copy app 
